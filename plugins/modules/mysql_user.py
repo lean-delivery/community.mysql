@@ -474,13 +474,6 @@ def get_grants(cursor, user, host):
     grants = re.search(pattern, grants_line[0]).group().strip()
     return grants.split(", ")
 
-def privileges_get_all(cursor):	
-    privileges = []	
-    cursor.execute('SELECT DISTINCT PRIVILEGE_TYPE FROM INFORMATION_SCHEMA.USER_PRIVILEGES WHERE IS_GRANTABLE="yes"')	
-    grants = cursor.fetchall()	
-    for grant in grants:	
-        privileges.append(grant[0])	
-    return privileges
 
 def user_add(cursor, user, host, host_all, password, encrypted,
              plugin, plugin_hash_string, plugin_auth_string, new_priv,
