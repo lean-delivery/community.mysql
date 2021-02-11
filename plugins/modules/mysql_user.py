@@ -661,7 +661,7 @@ def user_mod(cursor, user, host, host_all, password, encrypted,
                 # If the user has the GRANT OPTION on a db.table, revoke it first.
                 if "GRANT" in priv:
                     grant_option = True
-                if db_table not in new_priv:
+                if db_table not in new_priv and "*.*" not in new_priv:
                     if user != "root" and "PROXY" not in priv and not append_privs:
                         msg = "Privileges updated"
                         if module.check_mode:
@@ -672,7 +672,7 @@ def user_mod(cursor, user, host, host_all, password, encrypted,
             # If the user doesn't currently have any privileges on a db.table, then
             # we can perform a straight grant operation.
             for db_table, priv in iteritems(new_priv):
-                if db_table not in curr_priv:
+                if db_table not in curr_priv and db_table != "*.*":
                     msg = "New privileges granted"
                     if module.check_mode:
                         return (True, msg)
@@ -684,10 +684,10 @@ def user_mod(cursor, user, host, host_all, password, encrypted,
             db_table_intersect = set(new_priv.keys()) & set(curr_priv.keys())
             for db_table in db_table_intersect:
                 if "ALL" in new_priv[db_table]:
-                    if not append_privs:
+                    if user != "root" and not append_privs:
                         privileges_revoke(cursor, user, host, db_table, curr_priv[db_table], grant_option)
                     privileges_grant(cursor, user, host, db_table, new_priv[db_table], tls_requires)
-                    new_priv = {db_table: privileges_get_all(cursor)}	
+                    new_priv = privileges_get(cursor, user, host)
                     if append_privs:
                         priv_diff = set(new_priv[db_table]) - set(curr_priv[db_table])
                     else:
