@@ -677,14 +677,9 @@ def user_mod(cursor, user, host, host_all, password, encrypted,
             db_table_intersect = set(new_priv.keys()) & set(curr_priv.keys())
             for db_table in db_table_intersect:
                 if "ALL" in new_priv[db_table]:
-                    if user != "root" and not append_privs:
-                        privileges_revoke(cursor, user, host, db_table, curr_priv[db_table], grant_option)
                     privileges_grant(cursor, user, host, db_table, new_priv[db_table], tls_requires)
                     new_priv = privileges_get(cursor, user, host)
-                    if append_privs:
-                        priv_diff = set(new_priv[db_table]) - set(curr_priv[db_table])
-                    else:
-                        priv_diff = set(new_priv[db_table]) ^ set(curr_priv[db_table])
+                    priv_diff = set(new_priv[db_table]) ^ set(curr_priv[db_table])
 
                     if len(priv_diff) > 0:
                         msg = "Privileges updated"
